@@ -1,99 +1,179 @@
-Real-Time Chat App
-This is a real-time chat application built with Django Channels, WebSockets, and Redis. It supports multiple users and chat rooms, with a React frontend that showcases live updates.
-Features
-* Real-time messaging using WebSockets.
-* User authentication and profile management.
-* Chat room creation and participation.
-* Scalable architecture with Django, Redis, and Celery.
+Real-Time Collaboration App
+
+This is a real-time collaboration platform built with Django Channels, WebSockets, Redis, and React.
+It enables teams to coordinate through 24-hour standups, live chat, and role-based team management.
+
+Key Features
+🔹 Automatic Team Leader Assignment
+
+The first user to sign in becomes the Team Leader automatically.
+
+Team Leaders have elevated permissions, including:
+
+Inviting new team members
+
+Promoting a member to Team Leader
+
+Managing team roles
+
+🔹 Team Member Roles
+
+User actions depend on their role:
+
+Team Leader
+✓ Invite members
+✓ Post standups
+✓ Reply and chat
+✓ Promote team members
+
+Team Member
+✓ Post standups
+✓ Reply and chat
+✗ Cannot invite others
+✗ Cannot promote others
+
+🔹 Real-Time Standups
+
+Each user can post a daily standup update about what they have done so far.
+
+Standups automatically expire after 24 hours.
+
+Standups can receive replies, forming a real-time threaded discussion.
+
+🔹 Live Chat on Standup Replies
+
+When someone replies to a standup, a real-time WebSocket chat room is automatically created.
+
+All team members can interact instantly with:
+
+WebSockets
+
+Django Channels
+
+Redis Pub/Sub
+
+🔹 Modern Full-Stack Architecture
+
+Backend: Django + Django Channels + Redis
+
+Frontend: React + Vite
+
+WebSockets: Real-time messaging
+
+Celery: Background tasks (e.g., auto-deleting standups after 24 hours)
+
 Prerequisites
-Before you begin, ensure you have the following installed on your system:
-* Python 3.10+ (Django)
-* Node.js & npm (React)
-* Git
-* Redis Server (for local development)
+
+Make sure you have the following installed:
+
+Python 3.10+
+
+Django
+
+Node.js + npm
+
+Redis Server
+
+Git
+
 Local Setup Guide
-Follow these steps to get the application running on your local machine.
 Step 1: Clone the Repository
-Clone the project from your repository to your local machine.
-git clone <your-repository-url>
-cd <your-repository-name>
+git clone <your-repo-url>
+cd <project-folder>
 
 Step 2: Backend Setup (Django)
-Navigate to the backend directory to set up the Django API.
+Navigate to backend:
 cd backend
 
-1. Create and activate a Python virtual environment
-For macOS/Linux:
+Create virtual environment
+
+macOS/Linux:
+
 python3 -m venv .venv
 source .venv/bin/activate
 
-For Windows:
+
+Windows:
+
 python -m venv .venv
 .venv\Scripts\activate
 
-2. Install Python dependencies
-Install all the required packages from the requirements.txt file.
+Install dependencies:
 pip install -r requirements.txt
 
-3. Database Configuration
-You have two options for the database:
-* Option A: Use the default SQLite database (recommended for simple local setup).
-* Option B: Connect to a PostgreSQL database (e.g., on AWS RDS or a local instance).
-Option A (SQLite): No extra setup is required. The project is configured to use SQLite by default for development.
-Option B (PostgreSQL): You will need a running PostgreSQL server. If you're using AWS RDS, follow these steps to get the database credentials from your AWS Console:
-* Log in to your AWS account.
-* Navigate to the Amazon RDS dashboard.
-* Select your PostgreSQL database instance.
-* Click on the Connectivity & security tab.
-* Find the Endpoint & port and Credentials sections to get the DB_HOST, DB_PORT, DB_USER, and DB_PASSWORD.
-4. Create the Backend .env file
-Create a new file named .env in the backend directory and add the following configuration. Replace the placeholder values with your own if you are not using SQLite.
-# Django secret key
+Database Options
+Option A: SQLite (recommended for beginners)
+
+No configuration required.
+
+Option B: PostgreSQL (e.g., AWS RDS)
+
+Get credentials from your RDS instance under Connectivity & Security.
+
+Create Backend .env File
+
+Create a .env in the backend folder:
+
 SECRET_KEY=django-insecure-a7munyer4qud+-6gv_uj4016kzo!b_y94ywf5o8zdf_$frzm+6
 
-# Frontend URL for CORS
 FRONTEND_URL=http://localhost:5173
 
-# Redis configuration (for Celery and Channels)
 REDIS_URL=redis://localhost:6379/0
 CELERY_BROKER_URL=redis://localhost:6379/0
 
-# Database settings
 DB_NAME=postgres
 DB_USER=Hassanphine
 DB_PASSWORD=H.a.s.s.a.n123
 DB_HOST=microflow-database.ctescc44o1zj.us-east-2.rds.amazonaws.com
 DB_PORT=5432
 
-5. Apply database migrations
-Run the migrations to create the database schema.
+Apply Migrations
 python3 manage.py migrate
 
-6. Start the Django development server
+Start Django Server
 python3 manage.py runserver
 
-Your backend server will be running at http://127.0.0.1:8000.
-Step 3: Frontend Setup (React)
-Open a new terminal window and navigate to the frontend directory.
+
+Backend runs at:
+http://127.0.0.1:8000
+
+Step 3: Frontend (React)
+
+Open a new terminal:
+
 cd frontend
 
-1. Install npm dependencies
+
+Install dependencies:
+
 npm install
 
-2. Create the Frontend .env file
-Create a file named .env in the frontend directory with the following configuration:
-VITE_API_URL=[http://127.0.0.1:8000/api](http://127.0.0.1:8000/api)
+
+Create .env:
+
+VITE_API_URL=http://127.0.0.1:8000/api
 VITE_WS_URL=ws://127.0.0.1:8000/
 
-3. Start the React development server
+
+Start React:
+
 npm run dev
 
-Your frontend will be running at http://localhost:5173.
+
+Frontend runs at:
+http://localhost:5173
+
 Step 4: Run the App
-With both the Django and React development servers running, you can access the application in your browser at http://localhost:5173.
-Tip: To test the real-time features, open two browser tabs and log in with different users. You will be able to see messages appear instantly in both tabs.
 
+Open your browser at
+👉 http://localhost:5173
 
-￼￼
+To test real-time features:
 
-￼
+Open two browser windows
+
+Use two different accounts
+
+Post a standup and reply to it
+
+Watch real-time updates appear instantly
