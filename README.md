@@ -1,179 +1,226 @@
-Real-Time Collaboration App
+CollabsUp – Real-Time Team Collaboration Platform
 
-This is a real-time collaboration platform built with Django Channels, WebSockets, Redis, and React.
-It enables teams to coordinate through 24-hour standups, live chat, and role-based team management.
+CollabsUp is a real-time team collaboration platform built with Django, Django Channels, WebSockets, Redis, and React.
+It helps teams stay aligned through daily standups, role-based access control, and context-aware real-time discussions.
 
-Key Features
-🔹 Automatic Team Leader Assignment
+This repository is intended for learning, experimentation, and portfolio use.
+Feel free to modify, simplify, or rewrite this README to suit your own setup or learning goals.
 
-The first user to sign in becomes the Team Leader automatically.
+⸻
 
-Team Leaders have elevated permissions, including:
+🚀 Key Features
 
-Inviting new team members
+🔹 Team & Role Management
+	•	First registered user becomes the Team Leader
+	•	Role-based permissions:
+	•	Team Leaders can invite members and manage roles
+	•	Team Members can post standups and participate in discussions
 
-Promoting a member to Team Leader
+⸻
 
-Managing team roles
+🔹 Daily Standups
+	•	Users post daily updates
+	•	Standups expire automatically after 24 hours
+	•	Replies stay tied to their original standup for clarity
 
-🔹 Team Member Roles
+⸻
 
-User actions depend on their role:
+🔹 Real-Time Collaboration
+	•	Replying to a standup creates a dedicated real-time discussion channel
+	•	Instant updates powered by:
+	•	WebSockets
+	•	Django Channels
+	•	Redis Pub/Sub
 
-Team Leader
-✓ Invite members
-✓ Post standups
-✓ Reply and chat
-✓ Promote team members
+⸻
 
-Team Member
-✓ Post standups
-✓ Reply and chat
-✗ Cannot invite others
-✗ Cannot promote others
+🔹 Background Processing
+	•	Asynchronous tasks handled using Celery
+	•	Used for data cleanup and scheduled operations
 
-🔹 Real-Time Standups
 
-Each user can post a daily standup update about what they have done so far.
+🛠 Tech Stack
 
-Standups automatically expire after 24 hours.
+Backend
+	•	Python
+	•	Django
+	•	Django REST Framework
+	•	Django Channels
+	•	Redis
+	•	Celery
 
-Standups can receive replies, forming a real-time threaded discussion.
+Frontend
+	•	React
+	•	Vite
 
-🔹 Live Chat on Standup Replies
+Database
+	•	SQLite (default, recommended for local development)
+	•	PostgreSQL (optional, production-style setup)
 
-When someone replies to a standup, a real-time WebSocket chat room is automatically created.
+⸻
 
-All team members can interact instantly with:
+📋 Prerequisites
+	•	Python 3.10+
+	•	Node.js 18+
+	•	npm
+	•	Redis Server
+	•	Git
 
-WebSockets
+⸻
 
-Django Channels
+⚙️ Local Setup Guide
 
-Redis Pub/Sub
+1️⃣ Clone the Repository
+git clone <repository-url>
+cd <repository-name>
 
-🔹 Modern Full-Stack Architecture
 
-Backend: Django + Django Channels + Redis
 
-Frontend: React + Vite
+⸻
 
-WebSockets: Real-time messaging
+🔧 Backend Setup (Django)
 
-Celery: Background tasks (e.g., auto-deleting standups after 24 hours)
-
-Prerequisites
-
-Make sure you have the following installed:
-
-Python 3.10+
-
-Django
-
-Node.js + npm
-
-Redis Server
-
-Git
-
-Local Setup Guide
-Step 1: Clone the Repository
-git clone <your-repo-url>
-cd <project-folder>
-
-Step 2: Backend Setup (Django)
-Navigate to backend:
 cd backend
 
-Create virtual environment
+Create and activate virtual environment
 
-macOS/Linux:
-
+macOS / Linux
 python3 -m venv .venv
 source .venv/bin/activate
 
-
-Windows:
-
+Windows
 python -m venv .venv
 .venv\Scripts\activate
 
-Install dependencies:
+Install dependencies
 pip install -r requirements.txt
 
-Database Options
-Option A: SQLite (recommended for beginners)
+🔐 Environment Configuration
 
-No configuration required.
+This project uses environment variables for configuration.
+For security reasons, .env files are not committed to version control.
 
-Option B: PostgreSQL (e.g., AWS RDS)
 
-Get credentials from your RDS instance under Connectivity & Security.
 
-Create Backend .env File
+🔐 SECRET_KEY section
 
-Create a .env in the backend folder:
+### Generating a SECRET_KEY
+Generate your own Django SECRET_KEY using:
 
-SECRET_KEY=django-insecure-a7munyer4qud+-6gv_uj4016kzo!b_y94ywf5o8zdf_$frzm+6
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+
+Create a .env file (backend)
+SECRET_KEY=your-secret-key
+DEBUG=False
 
 FRONTEND_URL=http://localhost:5173
 
+# Redis
 REDIS_URL=redis://localhost:6379/0
 CELERY_BROKER_URL=redis://localhost:6379/0
 
-DB_NAME=postgres
-DB_USER=Hassanphine
-DB_PASSWORD=H.a.s.s.a.n123
-DB_HOST=microflow-database.ctescc44o1zj.us-east-2.rds.amazonaws.com
+# Database(PostgreSQL)
+DB_NAME=your-db-name
+DB_USER=your-db-user
+DB_PASSWORD=your-db-password
+DB_HOST=your-db-host
 DB_PORT=5432
 
-Apply Migrations
-python3 manage.py migrate
 
-Start Django Server
-python3 manage.py runserver
+### Email Configuration
+Email is used for:
+- Account verification
+- Team invitation links
+
+To enable email functionality, configure SMTP credentials using your own email provider.
+
+#### Gmail (Example)
+
+1. Enable 2-Step Verification on your Google account
+2. Create an App Password
+3. Set the following environment variables:
+
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=your-app-password
+
+If email is not configured, account creation will not work, because 
+verification emails will not be sent.
+
+🗄 Database 
+PostgreSQL 
+Provide PostgreSQL credentials in the .env file, then run:
+python manage.py migrate
+
+
+
+⸻
+
+Start Django server
+python manage.py runserver
 
 
 Backend runs at:
 http://127.0.0.1:8000
 
-Step 3: Frontend (React)
+🔄 Start Redis
 
-Open a new terminal:
+Ensure Redis is running locally:
+redis-server
 
+
+⚙️ (Optional) Start Celery Worker
+
+In a separate terminal:
+cd backend
+source .venv/bin/activate
+celery -A backend worker -l info
+
+
+
+⸻
+
+🎨 Frontend Setup (React)
 cd frontend
-
-
-Install dependencies:
-
 npm install
 
-
-Create .env:
-
+Create frontend .env
 VITE_API_URL=http://127.0.0.1:8000/api
 VITE_WS_URL=ws://127.0.0.1:8000/
 
 
-Start React:
+⸻
 
+Start frontend
 npm run dev
-
 
 Frontend runs at:
 http://localhost:5173
 
-Step 4: Run the App
+🧪 Testing Real-Time Features
+	1.	Open two browser windows
+	2.	Create two user accounts
+	3.	Post a standup from one account
+	4.	Reply from the other
+	5.	Observe instant real-time updates
 
-Open your browser at
-👉 http://localhost:5173
+⸻
 
-To test real-time features:
+🔐 Security Notes
+	•	Secrets are managed via environment variables
+	•	.env files are excluded from version control
+	•	Rotate credentials if testing with real services
 
-Open two browser windows
+⸻
 
-Use two different accounts
+📌 Customization Notes
+	•	You are encouraged to modify or rewrite this README
+	•	PostgreSQL is used because of production-style setups
 
-Post a standup and reply to it
+⸻
 
-Watch real-time updates appear instantly
+📄 License
+
+This project is intended for educational and portfolio use.
+
+
+
