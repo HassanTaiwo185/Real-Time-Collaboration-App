@@ -1,224 +1,136 @@
 CollabsUp – Real-Time Team Collaboration Platform
 
-CollabsUp is a real-time team collaboration platform built with Django, Django Channels, WebSockets, Redis, and React.
-It helps teams stay aligned through daily standups, role-based access control, and context-aware real-time discussions.
+CollabsUp is a real-time team collaboration platform built with Django, Django Channels, WebSockets, Redis, and React. It helps teams stay aligned through daily standups, role-based access control, and context-aware real-time discussions.
 
-This repository is intended for learning, experimentation, and portfolio use.
-Feel free to modify, simplify, or rewrite this README to suit your own setup or learning goals.
+Features
 
-⸻
+Team and Role Management
 
-🚀 Key Features
+The first registered user automatically becomes the Team Leader. Team Leaders can invite members and assign roles. Team Members can post standups and participate in discussions.
 
-🔹 Team & Role Management
-	•	First registered user becomes the Team Leader
-	•	Role-based permissions:
-	•	Team Leaders can invite members and manage roles
-	•	Team Members can post standups and participate in discussions
+Daily Standups
 
-⸻
+Users post daily updates that expire automatically after 24 hours. Replies remain tied to their original standup for context and clarity.
 
-🔹 Daily Standups
-	•	Users post daily updates
-	•	Standups expire automatically after 24 hours
-	•	Replies stay tied to their original standup for clarity
+Real-Time Collaboration
 
-⸻
+Replying to a standup creates a dedicated real-time discussion channel powered by WebSockets, Django Channels, and Redis Pub/Sub.
 
-🔹 Real-Time Collaboration
-	•	Replying to a standup creates a dedicated real-time discussion channel
-	•	Instant updates powered by:
-	•	WebSockets
-	•	Django Channels
-	•	Redis Pub/Sub
+Background Processing
 
-⸻
+Asynchronous tasks such as data cleanup and scheduled operations are handled by Celery.
 
-🔹 Background Processing
-	•	Asynchronous tasks handled using Celery
-	•	Used for data cleanup and scheduled operations
+Tech Stack
 
+Backend: Python, Django, Django REST Framework, Django Channels, Redis, Celery
 
-🛠 Tech Stack
+Frontend: React, Vite
 
-Backend
-	•	Python
-	•	Django
-	•	Django REST Framework
-	•	Django Channels
-	•	Redis
-	•	Celery
+Database: PostgreSQL (production) / SQLite (local development)
 
-Frontend
-	•	React
-	•	Vite
+Prerequisites
 
-Database
-	•	SQLite (default, recommended for local development)
-	•	PostgreSQL (optional, production-style setup)
+Python 3.10+
+Node.js 18+
+npm
+Redis
+Git
+Local Setup
 
-⸻
-
-📋 Prerequisites
-	•	Python 3.10+
-	•	Node.js 18+
-	•	npm
-	•	Redis Server
-	•	Git
-
-⸻
-
-⚙️ Local Setup Guide
-
-1️⃣ Clone the Repository
-git clone <repository-url>
-cd <repository-name>
+1. Clone the Repository
 
 
+bash
+git clone https://github.com/HassanTaiwo185/Real-Time-Collaboration-App
+cd Real-Time-Collaboration-App
+2. Backend Setup
 
-⸻
 
-🔧 Backend Setup (Django)
-
+bash
 cd backend
-
-Create and activate virtual environment
-
-macOS / Linux
 python3 -m venv .venv
-source .venv/bin/activate
-
-Windows
-python -m venv .venv
-.venv\Scripts\activate
-
-Install dependencies
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+```
 
-🔐 Environment Configuration
-
-This project uses environment variables for configuration.
-For security reasons, .env files are not committed to version control.
-
-
-
-🔐 SECRET_KEY section
-
-### Generating a SECRET_KEY
-Generate your own Django SECRET_KEY using:
-
-python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
-
-Create a .env file (backend)
-SECRET_KEY=your-secret-key
+Create a `.env` file in the `backend` directory:
+```
+SECRET_KEY=your-django-secret-key
 DEBUG=False
-
 FRONTEND_URL=http://localhost:5173
 
-# Redis
 REDIS_URL=redis://localhost:6379/0
 CELERY_BROKER_URL=redis://localhost:6379/0
 
-# Database(PostgreSQL)
 DB_NAME=your-db-name
 DB_USER=your-db-user
 DB_PASSWORD=your-db-password
 DB_HOST=your-db-host
 DB_PORT=5432
 
-
-### Email Configuration
-Email is used for:
-- Account verification
-- Team invitation links
-
-To enable email functionality, configure SMTP credentials using your own email provider.
-
-#### Gmail (Example)
-
-1. Enable 2-Step Verification on your Google account
-2. Create an App Password
-3. Set the following environment variables:
-
 EMAIL_HOST_USER=your-email@gmail.com
 EMAIL_HOST_PASSWORD=your-app-password
+To generate a Django secret key:
 
-If email is not configured, account creation will not work, because 
-verification emails will not be sent.
 
-🗄 Database 
-PostgreSQL 
-Provide PostgreSQL credentials in the .env file, then run:
+bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+Note: Email must be configured for account verification and team invitations to work.
+
+Run migrations and start the server:
+
+
+bash
 python manage.py migrate
-
-
-
-⸻
-
-Start Django server
 python manage.py runserver
+Backend runs at http://127.0.0.1:8000
+
+3. Start Redis
 
 
-Backend runs at:
-http://127.0.0.1:8000
-
-🔄 Start Redis
-
-Ensure Redis is running locally:
+bash
 redis-server
-
-
-⚙️ (Optional) Start Celery Worker
+4. Start Celery Worker (optional)
 
 In a separate terminal:
+
+
+bash
 cd backend
 source .venv/bin/activate
 celery -A backend worker -l info
+5. Frontend Setup
 
 
-
-⸻
-
-🎨 Frontend Setup (React)
+bash
 cd frontend
 npm install
+```
 
-Create frontend .env
+Create a `.env` file in the `frontend` directory:
+```
 VITE_API_URL=http://127.0.0.1:8000/api
 VITE_WS_URL=ws://127.0.0.1:8000/
+Start the development server:
 
 
-⸻
-
-Start frontend
+bash
 npm run dev
+Frontend runs at http://localhost:5173
 
-Frontend runs at:
-http://localhost:5173
+Testing Real-Time Features
 
-🧪 Testing Real-Time Features
-	1.	Open two browser windows
-	2.	Create two user accounts
-	3.	Post a standup from one account
-	4.	Reply from the other
-	5.	Observe instant real-time updates
+Open two browser windows
+Create two separate user accounts
+Post a standup from one account
+Reply to it from the other
+Observe the instant real-time update
+Security Notes
 
-⸻
-
-🔐 Security Notes
-	•	Secrets are managed via environment variables
-	•	.env files are excluded from version control
-	•	Rotate credentials if testing with real services
-
-⸻
-
-📌 Customization Notes
-	•	You are encouraged to modify or rewrite this README
-	•	PostgreSQL is used because of production-style setups
-
-⸻
-
-📄 License
+All secrets are managed through environment variables
+.env files are excluded from version control via .gitignore
+Rotate any credentials used during testing before deploying
+License
 
 This project is intended for educational and portfolio use.
 
