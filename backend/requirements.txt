@@ -18,3 +18,4 @@ attrs>=23.1.0
 celery
 gunicorn
 
+Pillow
