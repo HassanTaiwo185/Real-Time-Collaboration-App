@@ -19,6 +19,7 @@ const Form = ({ route, isLogin = true }) => {
   const [code, setCode] = useState("")
   const navigate = useNavigate();
   const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // reset all when route changes
   useEffect(() => {
@@ -29,6 +30,7 @@ const Form = ({ route, isLogin = true }) => {
     setCode("");
     setError(null);
     setRememberMe(false);
+    setLoading(false);
   }, [route, isLogin]);
 
 
@@ -47,6 +49,8 @@ const Form = ({ route, isLogin = true }) => {
   // login user based on role
   const login = async (e) => {
     e.preventDefault();
+    if (loading) return;
+    setLoading(true);
     try {
       const response = await api.post(route, { username, password });
       if (response.status === 200) {
@@ -81,12 +85,15 @@ const Form = ({ route, isLogin = true }) => {
       } else {
         setError("Something went wrong. Try again");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   // registering new user 
   const createUser = async (e) => {
   e.preventDefault();
+  if (loading) return;
   if (!username || !password || !confirmPassword || !email) {
     setError("Please fill in all fields");
     return;
@@ -102,6 +109,7 @@ const Form = ({ route, isLogin = true }) => {
     return;
   }
 
+  setLoading(true);
   try {
     const response = await api.post(route, {
       username,
@@ -129,6 +137,8 @@ const Form = ({ route, isLogin = true }) => {
     } else {
       setError("Something went wrong. Please try again.");
     }
+  } finally {
+    setLoading(false);
   }
 };
 
@@ -136,11 +146,13 @@ const Form = ({ route, isLogin = true }) => {
  // confirm user email 
 const confirmUser = async (e) => {
   e.preventDefault();
+  if (loading) return;
   if (!code) {
     setError("Please enter the confirmation code.");
     return;
   }
 
+  setLoading(true);
   try {
     const username = localStorage.getItem("usernameForConfirm") || "";
     const response = await api.post(route, { username, code });
@@ -159,6 +171,8 @@ const confirmUser = async (e) => {
     } else {
       setError("Something went wrong. Please try again.");
     }
+  } finally {
+    setLoading(false);
   }
 };
 
@@ -166,11 +180,13 @@ const confirmUser = async (e) => {
   // requesting forgot password 
   const requestReset = async (e) => {
     e.preventDefault();
+    if (loading) return;
     if (!email) {
       setError("Please enter your email.");
       return;
     }
 
+    setLoading(true);
     try {
       const response = await api.post(route, { email, username });
       if (response.status === 200) {
@@ -194,12 +210,15 @@ const confirmUser = async (e) => {
       } else {
         setError("Something went wrong.");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   // reset password after sucessful user validation 
   const resetPassword = async (e) => {
     e.preventDefault();
+    if (loading) return;
     if (!password || !confirmPassword) {
       setError("Please fill in all fields");
       return;
@@ -215,6 +234,7 @@ const confirmUser = async (e) => {
       return;
     }
 
+    setLoading(true);
     try {
       const storedUsername = localStorage.getItem("resetUsername") || username;
       const storedEmail = localStorage.getItem("resetEmail") || email;
@@ -241,6 +261,8 @@ const confirmUser = async (e) => {
       } else {
         setError("Something went wrong.");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -257,8 +279,9 @@ const confirmUser = async (e) => {
           className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline focus:ring-blue-500 focus:border-transparent" />
           <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" 
           className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline focus:ring-blue-500 focus:border-transparent" />
-          <button onClick={requestReset} className="w-full bg-blue-600 text-white px-4 py-3 rounded-md
-          hover:bg-blue-800">Send Reset Code</button>
+          <button onClick={requestReset} disabled={loading} className="w-full bg-blue-600 text-white px-4 py-3 rounded-md hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed">
+            {loading ? "Sending..." : "Send Reset Code"}
+          </button>
         </>
       )}
   
@@ -271,8 +294,9 @@ const confirmUser = async (e) => {
           className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline focus:ring-blue-500 focus:border-transparent"/>
           <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm Password" 
           className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline focus:ring-blue-500 focus:border-transparent"/>
-          <button onClick={resetPassword} className="w-full bg-blue-600 text-white px-4 py-3 rounded-md
-          hover:bg-blue-800">Reset Password</button>
+          <button onClick={resetPassword} disabled={loading} className="w-full bg-blue-600 text-white px-4 py-3 rounded-md hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed">
+            {loading ? "Resetting..." : "Reset Password"}
+          </button>
         </>
       )}
 
@@ -326,12 +350,22 @@ const confirmUser = async (e) => {
       )}
 
       {/* BUTTONS */}
-      {isLogin && <button onClick={login} className="w-full bg-blue-600 text-white px-4 py-3 rounded-md
-          hover:bg-blue-800">Login</button>}
-      {!isLogin && route === "users/register/" && <button onClick={createUser} className="w-full bg-green-600 text-white px-4 py-3 rounded-md
-          hover:bg-green-800">Register</button>}
-      {route === "users/confirm/" && <button onClick={confirmUser} className="w-full bg-purple-600 text-white px-4 py-3 rounded-md
-          hover:bg-purple-800">Confirm Account</button>}</div>
+      {isLogin && (
+        <button onClick={login} disabled={loading} className="w-full bg-blue-600 text-white px-4 py-3 rounded-md hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed">
+          {loading ? "Logging in..." : "Login"}
+        </button>
+      )}
+      {!isLogin && route === "users/register/" && (
+        <button onClick={createUser} disabled={loading} className="w-full bg-green-600 text-white px-4 py-3 rounded-md hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed">
+          {loading ? "Creating account..." : "Register"}
+        </button>
+      )}
+      {route === "users/confirm/" && (
+        <button onClick={confirmUser} disabled={loading} className="w-full bg-purple-600 text-white px-4 py-3 rounded-md hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed">
+          {loading ? "Confirming..." : "Confirm Account"}
+        </button>
+      )}
+      </div>
     </div>
   );
 };
