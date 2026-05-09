@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import SignupPage from "./pages/Signup";
 import RegisterPage from "./pages/Register";
 import ConfirmUserPage from "./pages/ConfirmUser";
@@ -35,9 +35,6 @@ function App() {
         <Route path="/chatroom/:roomId/:standupId" element={<ChatRoom />} />
         <Route path="/edit/standup/:id" element={<EditStandupForm />} />
 
-         
-        
-       
       </Routes>
     </Router>
   );
