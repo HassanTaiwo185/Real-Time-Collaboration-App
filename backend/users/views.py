@@ -1,13 +1,14 @@
 from django.shortcuts import render
-from rest_framework import generics , status
-from .serializers import CreateUser ,UpdateUserSerializer , ForgotPasswordSerializer , UserSerializer ,ResetPasswordSerializer
-from rest_framework.permissions import AllowAny , IsAuthenticated , IsAdminUser
-from .models import User ,ConfirmationCode
-from django.core.mail import send_mail
+from rest_framework import generics, status
+from .serializers import CreateUser, UpdateUserSerializer, ForgotPasswordSerializer, UserSerializer, ResetPasswordSerializer
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
+from .models import User, ConfirmationCode
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import random
+import requests
+import os
 from rest_framework.parsers import MultiPartParser, FormParser
 
 
@@ -15,26 +16,46 @@ from rest_framework.parsers import MultiPartParser, FormParser
 def generate_confirmation_code():
     return ''.join(str(random.randint(0, 9)) for _ in range(6))
 
+
+# Send email via Brevo HTTP API (works on all platforms, no SMTP needed)
+def send_brevo_email(to_email, subject, message):
+    api_key = os.getenv('BREVO_API_KEY')
+    response = requests.post(
+        "https://api.brevo.com/v3/smtp/email",
+        headers={
+            "api-key": api_key,
+            "Content-Type": "application/json"
+        },
+        json={
+            "sender": {"email": "ayindehassan776@gmail.com", "name": "CollabsUp"},
+            "to": [{"email": to_email}],
+            "subject": subject,
+            "textContent": message
+        }
+    )
+    return response
+
+
 # Create your views here.
 class CreateUserViews(generics.CreateAPIView):
     serializer_class = CreateUser
     queryset = User.objects.all()
     permission_classes = [AllowAny]
-    
 
     def perform_create(self, serializer):
         user = serializer.save(is_active=False)
         code = generate_confirmation_code()
         ConfirmationCode.objects.create(user=user, code=code)
 
-        send_mail(subject="Email Confirmatiom",
-                  message=f"Your email confirmation is {code}",
-                  from_email=settings.DEFAULT_FROM_EMAIL,
-                  recipient_list=[user.email],
-                  fail_silently=False,)
-        
+        # Send confirmation email via Brevo API
+        send_brevo_email(
+            to_email=user.email,
+            subject="Email Confirmation",
+            message=f"Your email confirmation code is {code}"
+        )
 
-# Confirming user email and activating user acoount 
+
+# Confirming user email and activating user account
 class ConfirmCode(APIView):
     permission_classes = [AllowAny]
 
@@ -73,38 +94,42 @@ class ConfirmCode(APIView):
         confirmation_code.delete()
 
         return Response({"message": "Account activated successfully"}, status=status.HTTP_200_OK)
+
+
 # Edit user profile
 class EditUser(generics.UpdateAPIView):
     serializer_class = UpdateUserSerializer
-    permission_classes = [IsAdminUser,IsAuthenticated]
-    
+    permission_classes = [IsAdminUser, IsAuthenticated]
+
     def get_queryset(self):
         user = self.request.user
         return User.objects.filter(team=user.team)
 
+
 # Delete User profile
 class DeleteUser(generics.DestroyAPIView):
     serializer_class = CreateUser
-    permission_classes = [IsAdminUser,IsAuthenticated]
-    
+    permission_classes = [IsAdminUser, IsAuthenticated]
+
     def get_queryset(self):
         user = self.request.user
         return User.objects.filter(team=user.team)
-    
+
 
 # List all users
 class ListUsers(generics.ListAPIView):
     serializer_class = CreateUser
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
         user = self.request.user
         return User.objects.filter(team=user.team)
-    
-    
+
+
 # Forgot password VIEWS
 class ForgotPasswordView(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = ForgotPasswordSerializer(data=request.data)
         if serializer.is_valid():
@@ -118,18 +143,17 @@ class ForgotPasswordView(APIView):
             code = generate_confirmation_code()
             ConfirmationCode.objects.create(user=user, code=code)
 
-            send_mail(
+            # Send reset email via Brevo API
+            send_brevo_email(
+                to_email=email,
                 subject="Reset Your Password",
-                message=f"Your reset code is: {code}",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[email],
-                fail_silently=False,
+                message=f"Your password reset code is: {code}"
             )
 
-            return Response({"message": "Password reset code sent.","username": user.username,"email": user.email}, status=200)
+            return Response({"message": "Password reset code sent.", "username": user.username, "email": user.email}, status=200)
 
-        # Return serializer errors
         return Response(serializer.errors, status=400)
+
 
 # Reset user password view
 class ResetPasswordView(APIView):
@@ -159,9 +183,9 @@ class ResetPasswordView(APIView):
 
         print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    
-# Get current user 
+
+
+# Get current user
 class CurrentUserView(APIView):
     permission_classes = [IsAuthenticated]
 
