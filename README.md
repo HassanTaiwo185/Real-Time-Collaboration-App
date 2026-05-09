@@ -118,6 +118,10 @@ bash
 npm run dev
 Frontend runs at http://localhost:5173
 
+Live url
+
+https://real-time-collaboration-app-mu.vercel.app 
+
 Testing Real-Time Features
 
 Open two browser windows
