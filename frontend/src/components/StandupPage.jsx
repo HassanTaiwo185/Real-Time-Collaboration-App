@@ -191,10 +191,12 @@ const StandupPage = ({ standupList, setStandupList }) => {
                             </div>
 
                             {/* Chat room button */}
-                            {roomUUID && (
+                            {roomUUID ? (
                                 <button onClick={() => goToChatRoom(roomUUID, standup.id)} className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 mb-2">
                                     Open Chat
                                 </button>
+                            ) : (
+                                <p className="text-gray-500 italic text-sm mb-2">No chat room yet</p>
                             )}
 
                             {/* Reply */}
