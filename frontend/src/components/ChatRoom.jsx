@@ -56,9 +56,14 @@ const ChatRoom = () => {
                         if (!data.id) return;
                         setMessages((prev) => (prev.some((m) => m.id === data.id) ? prev : [...prev, data]));
                     } else if (data.type === "writing_active") {
-                        if (data.content === "typing" && data.sender !== currentUser.username) {
+                        // Show typing indicator for other users only
+                        if (data.sender !== currentUser.username) {
                             setTypingUsers((prev) => new Set(prev).add(data.sender));
-                            setTimeout(() => {
+                            // Clear existing timeout for this user and reset it
+                            if (window[`typingTimeout_${data.sender}`]) {
+                                clearTimeout(window[`typingTimeout_${data.sender}`]);
+                            }
+                            window[`typingTimeout_${data.sender}`] = setTimeout(() => {
                                 setTypingUsers((prev) => {
                                     const copy = new Set(prev);
                                     copy.delete(data.sender);
@@ -66,9 +71,7 @@ const ChatRoom = () => {
                                 });
                             }, 3000);
                         }
-                        
-                    }
-                    else if (data.type === "chat_delete") {
+                    } else if (data.type === "chat_delete") {
                         setMessages((prev) => prev.filter((msg) => msg.id !== data.id));
                     }
                 } catch {
@@ -83,7 +86,7 @@ const ChatRoom = () => {
 
             socket.onclose = (event) => {
                 console.log("WebSocket Closed:", event.code, event.reason);
-                if (event.code !== 1000) { // Check for normal closure
+                if (event.code !== 1000) {
                     reconnectTimeoutRef.current = setTimeout(() => {
                         connectSocket();
                     }, 5000);
@@ -93,7 +96,7 @@ const ChatRoom = () => {
             console.error("Failed to connect to WebSocket:", err);
             setError("Failed to establish WebSocket connection.");
         }
-    }, [roomId, currentUser.username]); // Added currentUser.username to dependencies
+    }, [roomId, currentUser.username]);
 
     useEffect(() => {
         let isMounted = true;
@@ -120,9 +123,8 @@ const ChatRoom = () => {
             }
             if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
         };
-    }, [roomId, standupId, connectSocket]); // Added connectSocket to dependencies
+    }, [roomId, standupId, connectSocket]);
 
-    // ... (rest of your component logic, unchanged)
     const sendMessage = () => {
         setError(null);
         if (!input.trim() || socketRef.current?.readyState !== WebSocket.OPEN) {
@@ -224,13 +226,10 @@ const ChatRoom = () => {
                 })}
                 <div ref={messagesEndRef} />
             </div>
+            {/* Typing indicator */}
             {typingUsers.size > 0 && (
-                <div className="mt-2 italic text-gray-500">
-                    {Array.from(typingUsers).map((userId) => (
-                        <span key={userId} className="mr-2">
-                            {userId} is typing...
-                        </span>
-                    ))}
+                <div className="mt-2 italic text-gray-500 text-sm">
+                    {Array.from(typingUsers).join(", ")} {typingUsers.size === 1 ? "is" : "are"} typing...
                 </div>
             )}
             <div className="mt-4 flex gap-2">
