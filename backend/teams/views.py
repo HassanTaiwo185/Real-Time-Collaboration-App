@@ -56,7 +56,7 @@ class GenerateTeamInviteView(generics.CreateAPIView):
 
         # creating team invite
         invite = TeamInvite.objects.create(team=team, invitee_email=invitee_email)
-        invite_link = f"{settings.FRONTEND_URL}/register/?invite_token={invite.token}"
+        invite_link = f"{settings.FRONTEND_URL}/#/register/?invite_token={invite.token}"
 
         # Email invitee via Brevo API
         send_brevo_email(
