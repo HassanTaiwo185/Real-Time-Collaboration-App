@@ -14,6 +14,7 @@ import CreateStandup from "./components/CreateStandup";
 import StandupPage from "./components/StandupPage";
 import ChatRoom from "./components/ChatRoom";
 import EditStandupForm from "./components/EditStandupForm";
+import NotFound from "./pages/NotFound";
 
 function App() {
   const [backendReady, setBackendReady] = useState(false);
@@ -75,6 +76,7 @@ function App() {
         <Route path="/createstandups" element={<CreateStandup />} />
         <Route path="/chatroom/:roomId/:standupId" element={<ChatRoom />} />
         <Route path="/edit/standup/:id" element={<EditStandupForm />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );
