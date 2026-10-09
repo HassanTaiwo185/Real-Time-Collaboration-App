@@ -7,6 +7,8 @@ pipeline {
         VITE_API_URL   = 'http://localhost:8000/api'
         VITE_WS_URL    = 'ws://localhost:8000/'
         TRIVY_VERSION  = '0.72.0'
+        AWS_REGION     = 'us-east-1'
+
     
     }
 
