@@ -10,17 +10,17 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 RUN groupadd --system --gid 10001 appgroup \ 
-&& useradd --system --uid 1001 --gid appgroup  --no-create-home appuser
+&& useradd --system --uid 10001 --gid appgroup  --no-create-home appuser
 
 
 COPY requirements.txt .
-RUN pip install -r  requirements.txt
+RUN pip install -r  requirements.txt  && pip uninstall -y pip setuptools
 
 
 COPY . .
 
 
-USER appuser
+USER 10001
 
 EXPOSE 8000
 

@@ -12,7 +12,7 @@ ARG VITE_WS_URL
 RUN npm run build
 
 # Stage 2: Run the frontend with Nginx
-FROM nginx:alpine
+FROM nginxinc/nginx-unprivileged:1.28-alpine
 
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf

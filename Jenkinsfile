@@ -18,9 +18,9 @@ pipeline {
                 }
 
                 sh '''
-                    docker build -t ${BACKEND_IMAGE}:${IMAGE_TAG} ./backend
+                    docker build --pull -t ${BACKEND_IMAGE}:${IMAGE_TAG} ./backend
 
-                    docker build \
+                    docker build --pull \
                       --build-arg VITE_API_URL=${VITE_API_URL} \
                       --build-arg VITE_WS_URL=${VITE_WS_URL} \
                       -t ${FRONTEND_IMAGE}:${IMAGE_TAG} ./frontend
@@ -41,7 +41,6 @@ pipeline {
                         --severity HIGH,CRITICAL \
                         --ignore-unfixed \
                         ${IMAGE}:${IMAGE_TAG}
-
                     done
                 '''
             }
