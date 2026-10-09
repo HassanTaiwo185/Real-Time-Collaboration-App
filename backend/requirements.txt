@@ -17,5 +17,6 @@ cffi>=1.15.1
 attrs>=23.1.0
 celery
 gunicorn
-
+uvicorn[standard]
+uvicorn-worker
 Pillow

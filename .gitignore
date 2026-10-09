@@ -14,3 +14,10 @@ staticfiles/
 
 .env
 *.env
+
+.venv/
+*.pyc
+.git/
+
+node_modules/
+dist/
