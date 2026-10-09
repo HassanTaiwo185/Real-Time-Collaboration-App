@@ -7,6 +7,7 @@ pipeline {
         VITE_API_URL   = 'http://localhost:8000/api'
         VITE_WS_URL    = 'ws://localhost:8000/'
         TRIVY_VERSION  = '0.72.0'
+    
     }
 
     stages {
@@ -88,6 +89,47 @@ pipeline {
                         docker rm -f $PG $REDIS || true
                         docker network rm $NET || true
                     '''
+                }
+            }
+        }
+
+        stage('ECR Login') {
+            agent {
+                docker {
+                    image 'amazon/aws-cli:2.15.0'
+                    reuseNode true
+                    args "--entrypoint=''"
+                }
+            }
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'my-aws',
+                                                  usernameVariable: 'AWS_ACCESS_KEY_ID',
+                                                  passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    sh 'aws ecr get-login-password --region $AWS_REGION > .ecr-token'
+                }
+            }
+        }
+
+        stage('Push to ECR') {
+            environment {
+                AWS_ACCOUNT_ID = credentials('aws-account-id')
+            }
+            steps {
+                sh '''
+                    ECR_REGISTRY="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
+
+                    docker login --username AWS --password-stdin $ECR_REGISTRY < .ecr-token
+                    rm -f .ecr-token
+
+                    for IMAGE in $BACKEND_IMAGE $FRONTEND_IMAGE; do
+                      docker tag  $IMAGE:$IMAGE_TAG $ECR_REGISTRY/$IMAGE:$IMAGE_TAG
+                      docker push $ECR_REGISTRY/$IMAGE:$IMAGE_TAG
+                    done
+                '''
+            }
+            post {
+                always {
+                    sh 'docker logout "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com" || true'
                 }
             }
         }
