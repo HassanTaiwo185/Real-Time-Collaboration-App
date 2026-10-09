@@ -102,7 +102,7 @@ pipeline {
                 }
             }
             steps {
-                withCredentials([usernamePassword(credentialsId: 'my-aws',
+                withCredentials([usernamePassword(credentialsId: 'my_aws',
                                                   usernameVariable: 'AWS_ACCESS_KEY_ID',
                                                   passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     sh 'aws ecr get-login-password --region $AWS_REGION > .ecr-token'
