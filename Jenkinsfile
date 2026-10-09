@@ -36,10 +36,12 @@ pipeline {
                         -v /var/run/docker.sock:/var/run/docker.sock \
                         -v trivy-cache:/root/.cache/ \
                         aquasec/trivy:${TRIVY_VERSION} image \
+                        --timeout 15m \
                         --exit-code 1 \
                         --severity HIGH,CRITICAL \
                         --ignore-unfixed \
                         ${IMAGE}:${IMAGE_TAG}
+
                     done
                 '''
             }
