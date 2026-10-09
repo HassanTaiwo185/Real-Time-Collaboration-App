@@ -19,17 +19,15 @@ pipeline {
                 }
 
                 sh '''
-                    CACHE_BUST=$(date +%Y-%m-%d)
-
-                    docker build --pull \
-                      --build-arg APT_CACHE_BUST=$CACHE_BUST \
+                    
+                    docker build --pull --no-cache \
                       -t ${BACKEND_IMAGE}:${IMAGE_TAG} ./backend
 
-                    docker build --pull \
-                      --build-arg APK_CACHE_BUST=$CACHE_BUST \
+                    docker build --pull --no-cache \
                       --build-arg VITE_API_URL=${VITE_API_URL} \
                       --build-arg VITE_WS_URL=${VITE_WS_URL} \
                       -t ${FRONTEND_IMAGE}:${IMAGE_TAG} ./frontend
+
                 '''
             }
         }
