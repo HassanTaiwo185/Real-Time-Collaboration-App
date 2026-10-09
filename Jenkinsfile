@@ -6,6 +6,7 @@ pipeline {
         FRONTEND_IMAGE = 'collabsup-frontend'
         VITE_API_URL   = 'http://localhost:8000/api'
         VITE_WS_URL    = 'ws://localhost:8000/'
+        TRIVY_VERSION  = '<version>'
     }
 
     stages {
@@ -26,6 +27,25 @@ pipeline {
                 '''
             }
         }
+
+        stage('Trivy Scan') {
+            steps {
+                sh '''
+                    for IMAGE in ${BACKEND_IMAGE} ${FRONTEND_IMAGE}; do
+                      docker run --rm \
+                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        -v trivy-cache:/root/.cache/ \
+                        aquasec/trivy:${TRIVY_VERSION} image \
+                        --exit-code 1 \
+                        --severity HIGH,CRITICAL \
+                        --ignore-unfixed \
+                        ${IMAGE}:${IMAGE_TAG}
+                    done
+                '''
+            }
+        }
+
+    }
 
         stage('Unit Tests') {
             environment {
@@ -73,5 +93,5 @@ pipeline {
             }
         }
 
-    }
+
 }
